@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>零基础JavaScript编码二</title>
+	<link rel="stylesheet" type="text/css" href="css/normalize.css">
+	<style type="text/css">	
+		ul{
+			padding: 0;
+			list-style: none;
+		}
+		.wrapper{
+			width: 600px;
+			margin: 100px auto;
+		}
+		.space-30px{
+			display: inline-block;
+			width: 30px;
+		}
+	</style>
+	<script type="text/javascript">
+		function addEventListener(elm,etype,func){
+			if(elm){
+				if(elm.addEventListener){
+					elm.addEventListener(etype,func);
+				}else{
+					elm.attachEvent('on'+etype,func);
+				}
+			}
+		}
+
+		var aqiData = [
+						  ["北京", 90],
+						  ["上海", 50],
+						  ["福州", 10],
+						  ["广州", 50],
+						  ["成都", 90],
+						  ["西安", 100]
+						];
+		var oUl = null;
+		function updateQueryValue(maxValue){
+			maxValue = maxValue || 60;
+			var tags = oUl.getElementsByTagName('li');
+			var len = tags.length;
+			while(len>0){
+				len --;
+				oUl.removeChild(tags[len]);
+			}
+
+			for(var i=0,len=aqiData.length;i<len;i++){
+				var data = aqiData[i];
+				if(data[1]<=maxValue){
+					var li = document.createElement('li');
+					li.innerHTML = '城市：' + data[0] + '<span class="space-30px"></span>空气指数：'+data[1];
+					oUl.appendChild(li);
+				}
+			}
+		}
+		window.onload = function(){
+			oUl = document.getElementById('aqi-list');
+			var queryBtn = document.getElementById('query-btn');
+			var maxValue = document.getElementById('max-value');
+			addEventListener(queryBtn,'click',function(){
+				updateQueryValue(parseInt(maxValue.value));
+			});
+			updateQueryValue(1000);
+		}
+	</script>
+</head>
+<body>
+	<div class="wrapper">
+		<h3>污染城市列表</h3>
+		<input type="text" name="" id="max-value"><button id="query-btn">查询</button>
+		<ul id="aqi-list">
+		</ul>
+	</div>
+</body>
+</html>

@@ -11,12 +11,16 @@
 		}
 	</style>
 	<script type="text/javascript">
+		/**
+		*	addEventListener	支持IE8+浏览器,事件名称前不用加on
+		*	attachEvent			用于<=IE8 或 Opera 7.0 及 Opera事件处理，事件名称前要加on关键字
+		*/
 		function addEventListener(elm,etype,func){
 			if(elm){
 				if(elm.addEventListener){
 					elm.addEventListener(etype,func);
 				}else{
-					elm.attachEvent(etype,func);
+					elm.attachEvent('on'+etype,func);
 				}
 			}
 		}
