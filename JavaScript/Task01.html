@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>零基础JavaScript编码一</title>
+	<link rel="stylesheet" type="text/css" href="css/normalize.css">
+	<style type="text/css">
+		.wrapper{
+			width: 600px;
+			margin: 100px auto;
+		}
+	</style>
+	<script type="text/javascript">
+		function addEventListener(elm,etype,func){
+			if(elm){
+				if(elm.addEventListener){
+					elm.addEventListener(etype,func);
+				}else{
+					elm.attachEvent(etype,func);
+				}
+			}
+		}
+
+		window.onload = function(){
+			var iInput = document.getElementById('aqi-input');
+			var oInput = document.getElementById('aqi-display');
+
+			var submitBtn = document.getElementById('button');
+			addEventListener(submitBtn,'click',function(){
+				oInput.innerHTML = iInput.value;
+			});
+		}
+	</script>
+</head>
+<body>
+	<div class="wrapper">
+		<label>请输入北京今天空气质量：<input type="text" id="aqi-input"></label>
+		<button id="button">确认填写</button>
+		<div>您输入的值是:<span id="aqi-display">尚无默认值</span></div>
+	</div>
+</body>
+</html>
