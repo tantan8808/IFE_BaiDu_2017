@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>零基础JavaScript编码一</title>
+	<link rel="stylesheet" type="text/css" href="css/normalize.css">
+	<style type="text/css">
+		.wrapper{
+			width: 600px;
+			margin: 100px auto;
+		}
+		ul{
+			padding: 0;
+			list-style: none;
+		}
+	</style>
+	<script type="text/javascript">
+		/**
+		*	addEventListener	支持IE8+浏览器,事件名称前不用加on
+		*	attachEvent			用于<=IE8 或 Opera 7.0 及 Opera事件处理，事件名称前要加on关键字
+		*/
+		function addEventListener(elm,etype,func){
+			if(elm){
+				if(elm.addEventListener){
+					elm.addEventListener(etype,func);
+				}else{
+					elm.attachEvent('on'+etype,func);
+				}
+			}
+		}
+		function getData(){
+			var datas = [];
+			var items = sourceUl.getElementsByTagName('li');
+			for(var i=0,len=items.length;i<len;i++){
+				var innerHTML = items[i].innerHTML;
+				var city = innerHTML.substr(0,innerHTML.indexOf("空气质量："))
+				var value = parseInt(items[i].getElementsByTagName('b')[0].innerText);
+				datas.push({
+					city:city,
+					value:value,
+					innerHTML: innerHTML
+				})
+			}
+			return datas;
+		}
+		function sortAqiData(data) {
+			var ndata = data.sort(function(first,second){
+				return first.value - second.value;
+			});
+			return ndata;
+		}
+		function render(data) {
+			var resItems = resortUl.getElementsByTagName('li');
+			var len = resItems.length;
+			while(len>0){
+				len --;
+				resortUl.removeChild(resItems[len]);
+			}
+			len = data.length;
+			var cnNumber = '一二三四五六七八九十';
+			for(var i=0;i<len;i++){
+				var li = document.createElement('li');
+				li.innerHTML = '第'+ cnNumber.charAt(i) + '名：' + data[i].innerHTML;
+				resortUl.appendChild(li);
+			}
+		}
+		function btnHandle() {
+		  var aqiData = getData();
+		  aqiData = sortAqiData(aqiData);
+		  render(aqiData);
+		}
+		var sourceUl = null,resortUl = null;
+		window.onload = function(){
+			sourceUl = document.getElementById('source');
+			resortUl = document.getElementById('resort');
+
+			var sortBtn = document.getElementById('sort-btn');
+			addEventListener(sortBtn,'click',function(){
+				btnHandle();
+			});
+		}
+	</script>
+</head>
+<body>
+	<div class="wrapper">
+		<h4>排序前</h4>
+		<ul id="source">
+		    <li>北京空气质量：<b>90</b></li>
+		    <li>上海空气质量：<b>70</b></li>
+		    <li>天津空气质量：<b>80</b></li>
+		    <li>广州空气质量：<b>50</b></li>
+		    <li>深圳空气质量：<b>40</b></li>
+		    <li>福州空气质量：<b>32</b></li>
+		    <li>成都空气质量：<b>90</b></li>
+		 </ul>
+		 <h4>排序后</h4>
+		 <ul id="resort">
+		 </ul>
+		 <button id="sort-btn">排序</button>
+	</div>
+</body>
+</html>
