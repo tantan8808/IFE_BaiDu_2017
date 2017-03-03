@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>JavaScript和树（一）</title>
+	<link rel="stylesheet" type="text/css" href="css/normalize.css">
+	<script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.js"></script>
+	<style type="text/css">
+		.wrapper{
+			width: 800px;
+			margin: 100px auto;
+		}
+		.tree-container{
+			width: 100%;
+			overflow: hidden;
+		}
+		
+		.tree-container div{
+			float: left;
+			box-sizing: border-box;
+			width: 48%;
+			padding: 2%;
+			min-height: 100px;
+			border: 1px solid black;
+			overflow:hidden;
+			margin-right: 2%;
+		}		
+		.tree-container div:nth-child(even){
+			margin-right: 0;
+		}
+		.tree-container>div{
+			margin: 2% 0;
+		}
+		.tree-container>div{
+			border-color: red;
+		}
+		.tree-container>div>div{
+			border-color: green;
+		}
+		.tree-container>div>div>div{
+			border-color: darkred;
+		}
+		.wrapper>div>div{
+			width: 100%;
+			clear: both;
+		}
+		.current{
+			background: lightblue;
+		}
+	</style>
+	<script type="text/javascript">
+		function addEvent(elem,type,call){
+			if(elem.addEventListener){
+				elem.addEventListener(type,call);
+			}else if(elem.attachEvent){
+				elem.attachEvent('on'+type,call);
+			}
+		}
+		function getElementById(id){
+			return document.getElementById(id);
+		}
+		var nodes = [],nodeIndex = -1,timeout = -1;
+		function stopTravelNode(){
+			if(-1 != timeout)clearTimeout(timeout);
+			if(-1 != nodeIndex)$(nodes[nodeIndex]).removeClass('current');
+			nodes = [];
+			nodeIndex = -1;
+		}
+		function showTravelNode(){
+			$(nodes[nodeIndex]).removeClass('current');
+			nodeIndex ++;
+			$(nodes[nodeIndex]).addClass('current');
+			if(nodeIndex<nodes.length)timeout = setTimeout(showTravelNode,500);
+		}
+		//二叉树前序遍历：根-左-右
+		function front(node){
+			if (!(node == null)) {
+				nodes.push(node);
+				front(node.firstElementChild);
+				front(node.lastElementChild);
+			}
+		}
+		//二叉树中序遍历：左-根-右
+		function center(node){
+			if (!(node == null)) {
+				center(node.firstElementChild);
+				nodes.push(node);
+				center(node.lastElementChild);
+			}
+		}
+		//二叉树后序遍历：左-右-根
+		function back(node){
+			if (!(node == null)) {
+				back(node.firstElementChild);
+				back(node.lastElementChild);
+				nodes.push(node);
+			}
+		}
+		
+		window.onload = function(){		
+			var treeContainer = getElementById('tree-container'),
+			eventTargets = [
+				{
+					btn:getElementById('front-travel'),
+					callfunc:front
+				},{
+					btn:getElementById('center-travel'),
+					callfunc:center
+				},{
+					btn:getElementById('end-travel'),
+					callfunc:back
+				}
+			];
+			
+
+			for(var i=0,len=eventTargets.length;i<len;i++){
+				(function(item){
+					addEvent(item.btn,'click',function(){
+						stopTravelNode();
+						item.callfunc(treeContainer);
+						showTravelNode();
+					});
+				})(eventTargets[i]);
+			}
+		}
+	</script>
+</head>
+<body>
+	<div class="wrapper">
+		<button id="front-travel">前序遍历(DLR)</button>
+		<button id="center-travel">中序遍历(LDR)</button>
+		<button id="end-travel">后序遍历(LRD)</button>
+
+		<div class="tree-container" id="tree-container">
+			<div>
+				<div>
+					<div>
+						<div></div>
+						<div></div>
+					</div>
+					<div>
+						<div></div>
+						<div></div>
+					</div>
+				</div>
+				<div>
+					<div>
+						<div></div>
+						<div></div>
+					</div>
+					<div>
+						<div></div>
+						<div></div>
+					</div>
+				</div>
+			</div>
+			<div>
+				<div>
+					<div>
+						<div></div>
+						<div></div>
+					</div>
+					<div>
+						<div></div>
+						<div></div>
+					</div>
+				</div>
+				<div>
+					<div>
+						<div></div>
+						<div></div>
+					</div>
+					<div>
+						<div></div>
+						<div></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

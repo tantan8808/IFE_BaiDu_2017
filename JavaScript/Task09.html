@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>JavaScript和树（三）</title>
+	<link rel="stylesheet" type="text/css" href="css/normalize.css">
+	<script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.js"></script>
+	<script type="text/javascript" src="http://apps.bdimg.com/libs/lodash/3.5.0/lodash.min.js"></script>
+	<style type="text/css">
+		.wrapper{
+			width: 90%;
+			margin: 100px auto;
+		}
+		.tree-container{
+			margin-top: 20px;
+			border:1px solid lightblue;
+			padding: 10px;
+			width: 100%;
+			overflow: hidden;
+		}		
+		.tree-container div{
+			cursor: pointer;
+			vertical-align:top;
+			display:inline-block;
+			box-sizing: border-box;
+			min-height: 100px;
+			padding: 10px;
+			border: 1px solid black;
+			overflow:hidden;
+		}		
+		.tree-container div:nth-child(even){
+			margin-right: 0;
+		}
+		.tree-container>div{
+			border-color: red;
+		}
+		.tree-container>div>div{
+			border-color: green;
+		}
+		.tree-container>div>div>div{
+			border-color: darkred;
+		}
+		.selected{
+			background: lightgreen;
+		}
+	</style>
+	<script type="text/javascript">
+		var Untils = {
+			addClass:function(elm,cname){
+				var cList = elm.className.split(' ');
+				if(cList.indexOf(cname)===-1)cList.push(cname);
+				elm.className = cList.join(' ').trim();
+			},
+			removeClass:function(elm,cname){
+				var cList = elm.className.split(' ');
+				var index = cList.indexOf(cname);
+				while(index>-1){
+					cList.splice(index,1);
+					index = cList.indexOf(cname);
+				}
+				elm.className = cList.join(' ').trim();
+			},
+			addEvent:function(elm,type,func){
+				if(elm.addEventListener){
+					elm.addEventListener(type,func);
+				}else if(elm.attachEvent){
+					elm.attachEvent('on'+type,func);
+				}
+			},
+			removeEvent:function(elm,type,func){
+				if(elm.removeEventListener){
+					elm.removeEventListener(type,func);
+				}else if(elm.detachEvent){
+					elm.detachEvent('on'+type,func);
+				}
+			}
+		};
+		var $addKey = null,$addBtn = null,$delBtn = null,$selectedItem = null;
+		function selectedItem(e){
+			if(null != $selectedItem)$selectedItem.removeClass('selected');
+			$selectedItem = $(this);
+			$selectedItem.addClass('selected');
+			return false;
+		}
+		function removeItem(e){
+			console.log($selectedItem)
+			if(null != $selectedItem){
+				$selectedItem.off('click',selectedItem);
+				var sItem = $selectedItem[0];
+				sItem.parentNode.removeChild(sItem)
+			}
+			return false;
+		}
+		function addItem(e){
+			if(null != $selectedItem){
+				var key = $addKey.val().trim();
+				if(key.length>0){
+					var text = document.createTextNode(' ');
+					var div = document.createElement('div');
+					div.innerHTML = key;
+					div.style.display = 'inline-block';
+					$(div).on('click',selectedItem);
+					$addKey.val('');
+					$selectedItem[0].appendChild(text);
+					$selectedItem[0].appendChild(div);
+				}
+			}			
+			return false;
+		}
+		$(function(){
+			$addKey = $('#add-key');
+			$addBtn = $('#add-btn');
+			$delBtn = $('#del-btn');
+			Untils.removeClass(document.getElementById('test'),'hello');
+			$addBtn.on('click',addItem);
+			$delBtn.on('click',removeItem);
+			var $treeContainer = $('#tree-container');	
+			$treeContainer.find('div').on('click',selectedItem);
+		})
+	</script>
+</head>
+<body>
+	<div id='test' class="hello"></div>
+	<div class="wrapper">
+		<input type="text" id="add-key" placeholder="请输入查询的关键字"><button id="add-btn">添加</button>
+		<button id="del-btn">删除</button>
+		<div class="tree-container" id="tree-container">
+			Super
+			<div>
+				Apple
+				<div>Pear</div>
+				<div>Pig</div>
+				<div>Cala</div>
+				<div>
+					Phone
+				</div>
+				<div>
+					Book
+					<div>
+						History
+						<div>
+							China
+							<div>
+								Tang
+							</div>
+							<div>
+								Ming
+							</div>
+						</div>
+					</div>
+				</div>
+				<div>School</div>
+			</div>
+			<div>
+				Node
+				<div>
+					Human
+				</div>
+				<div>
+					Program
+					<div>
+						Ement
+						<div>Cat</div>
+					</div>
+					<div>
+						Glass
+					</div>
+				</div>
+			</div>
+			<div>
+				Fish
+			</div>
+		</div>
+	</div>
+</body>
+</html>

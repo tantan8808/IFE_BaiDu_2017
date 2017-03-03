@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>JavaScript和树（二）</title>
+	<link rel="stylesheet" type="text/css" href="css/normalize.css">
+	<script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.js"></script>
+	<script type="text/javascript" src="http://apps.bdimg.com/libs/lodash/3.5.0/lodash.min.js"></script>
+	<style type="text/css">
+		.wrapper{
+			width: 90%;
+			margin: 100px auto;
+		}
+		.tree-container{
+			margin-top: 20px;
+			border:1px solid lightblue;
+			padding: 10px;
+			width: 100%;
+			overflow: hidden;
+		}		
+		.tree-container div{
+			vertical-align:top;
+			display:inline-block;
+			box-sizing: border-box;
+			min-height: 100px;
+			padding: 10px;
+			border: 1px solid black;
+			overflow:hidden;
+		}		
+		.tree-container div:nth-child(even){
+			margin-right: 0;
+		}
+		.tree-container>div{
+			border-color: red;
+		}
+		.tree-container>div>div{
+			border-color: green;
+		}
+		.tree-container>div>div>div{
+			border-color: darkred;
+		}
+		@keyframes keyfinded{
+			0%{
+				background: darkred;
+			}
+			50%{
+				background: transparent;
+			}
+		}
+		.find{
+			animation: keyfinded .8s ease-in 5;
+			background: lightgreen;
+			color: white;
+		}
+	</style>
+	<script type="text/javascript">
+		function SearchTree(elem,options){
+			this.rootElem = elem;
+			this.nodes = [];
+			this.nodeIndex = -1;
+			this.timeout = -1;
+			this.findIndex = -1;
+			this.findKey = '';
+			this.default = {
+				find:{
+					'background':'lightgreen'
+				},
+				show:{
+					'background':'green'
+				},
+				hide:{
+					'background':'white'
+				},
+				timer: 1000
+			}
+			this.options = _.assign({},this.default,options);
+		}
+		SearchTree.prototype.stopTravelNode = function(){
+			if(this.timeout != -1)clearTimeout(this.timeout);
+			this.timeout = -1;
+			if(-1 != this.nodeIndex){
+				$(this.nodes[this.nodeIndex]).removeClass('find');
+				$(this.nodes[this.nodeIndex]).css(this.options.hide);
+			}
+			this.nodeIndex = -1;
+			this.nodes = [];
+		}
+		SearchTree.prototype.startTravelNode = function(){	
+			if(-1 != this.nodeIndex)$(this.nodes[this.nodeIndex]).css(this.options.hide);	
+			if(this.nodeIndex<this.nodes.length){				
+				this.nodeIndex ++;
+				if(this.findIndex == this.nodeIndex)
+				{
+					$(this.nodes[this.nodeIndex]).css(this.options.find);
+					$(this.nodes[this.nodeIndex]).addClass('find');
+				}else{
+					$(this.nodes[this.nodeIndex]).css(this.options.show);
+					var _this = this;
+					this.timeout = setTimeout(function(){
+						_this.startTravelNode();
+					},this.options.timer);
+				}				
+			}else{
+				if(this.findKey && this.findIndex == -1){
+					alert('没找到和' + this.findKey + '一样的节点!');
+				}
+				this.stopTravelNode();				
+			}
+		}
+		SearchTree.prototype.travelNode = function(node,key){
+			//开始遍历：
+			if(null != node){
+				this.nodes.push(node);				
+				var childs = node.children;
+				var firstNode = node.childNodes[0];
+				if(key && 3 == firstNode.nodeType && key===$(firstNode).text().trim())
+				{
+					this.findIndex = this.nodes.length-1;
+					return;
+				}
+				for(var i=0,len=childs.length;i<len;i++){
+					this.travelNode(childs[i],key);
+				}			
+			}
+		}
+		SearchTree.prototype.searchByKey = function(key){
+			this.findIndex = -1;
+			this.findKey = key;
+			this.stopTravelNode();		
+			this.travelNode(this.rootElem,key);
+			this.startTravelNode();			
+		}
+		SearchTree.prototype.start = function(){
+			this.findKey = '';
+			this.stopTravelNode();		
+			this.travelNode(this.rootElem);
+			this.startTravelNode();
+		}
+		
+		$(function(){
+			var $searchKey = $('#search-key'),
+			$treeContainer = $('#tree-container'),
+			treeContainer = $treeContainer[0],
+			searchTree = new SearchTree(treeContainer,{
+				find:{
+					'background':'darkred',
+				},
+				show:{
+					'background':'lightblue'
+				},
+				hide:{
+					'background':'transparent'
+				},
+				timer:500
+			}),
+			eventTargets = [{
+								btn:$('#front-travel'),
+								callfun:searchTree.start
+							},{
+								btn:$('#search-btn'),
+								callfun:searchNodeByValue
+							}
+						   ];
+			function searchNodeByValue(){
+				var key = $searchKey.val().trim();
+				$searchKey.attr('value',key);
+				if(key.length>0)searchTree.searchByKey(key);
+			}
+			for(var i=0,len=eventTargets.length;i<len;i++){
+				var target = eventTargets[i].btn;
+				target.callfun = eventTargets[i].callfun;
+				(function(tar){
+					tar.on('click',function(){
+						tar.callfun.call(searchTree);
+					});
+				}(target));					
+			}
+		})
+	</script>
+</head>
+<body>
+	<div class="wrapper">
+		<input type="text" id="search-key" placeholder="请输入查询的关键字"><button id="search-btn">查询</button>
+		<button id="front-travel">开始遍历</button>
+		<div class="tree-container" id="tree-container">
+			Super
+			<div>
+				Apple
+				<div>Pear</div>
+				<div>Pig</div>
+				<div>Cala</div>
+				<div>
+					Phone
+				</div>
+				<div>
+					Book
+					<div>
+						History
+						<div>
+							China
+							<div>
+								Tang
+							</div>
+							<div>
+								Ming
+							</div>
+						</div>
+					</div>
+				</div>
+				<div>School</div>
+			</div>
+			<div>
+				Node
+				<div>
+					Human
+				</div>
+				<div>
+					Program
+					<div>
+						Ement
+						<div>Cat</div>
+					</div>
+					<div>
+						Glass
+					</div>
+				</div>
+			</div>
+			<div>
+				Fish
+			</div>
+		</div>
+	</div>
+</body>
+</html>

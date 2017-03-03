@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>JavaScript和树（一）(模块化)</title>
+	<link rel="stylesheet" type="text/css" href="css/normalize.css">
+	<script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.js"></script>
+	<script type="text/javascript" src="http://apps.bdimg.com/libs/lodash/3.5.0/lodash.min.js"></script>
+	<style type="text/css">
+		.wrapper{
+			width: 800px;
+			margin: 100px auto;
+		}
+		.tree-container{
+			width: 100%;
+			overflow: hidden;
+		}
+		
+		.tree-container div{
+			float: left;
+			box-sizing: border-box;
+			width: 48%;
+			padding: 2%;
+			min-height: 100px;
+			border: 1px solid black;
+			overflow:hidden;
+			margin-right: 2%;
+		}		
+		.tree-container div:nth-child(even){
+			margin-right: 0;
+		}
+		.tree-container>div{
+			margin: 2% 0;
+		}
+		.tree-container>div{
+			border-color: red;
+		}
+		.tree-container>div>div{
+			border-color: green;
+		}
+		.tree-container>div>div>div{
+			border-color: darkred;
+		}
+		.wrapper>div>div{
+			width: 100%;
+			clear: both;
+		}
+	</style>
+	<script type="text/javascript">
+		function BinaryTree(elem,options){
+			this.rootElem = elem;
+			this.nodes = [];
+			this.nodeIndex = -1;
+			this.timeout = -1;
+			this.default = {
+				show:{
+					'background':'green'
+				},
+				hide:{
+					'background':'white'
+				},
+				timer: 1000
+			}
+			this.options = _.assign({},this.default,options);
+		}
+		BinaryTree.prototype.stopTravelNode = function(){
+			if(this.timeout != -1)clearTimeout(this.timeout);
+			this.timeout = -1;
+			if(-1 != this.nodeIndex)$(this.nodes[this.nodeIndex]).css(this.options.hide);
+			this.nodeIndex = -1;
+			this.nodes = [];
+		}
+		BinaryTree.prototype.startTravelNode = function(){	
+			if(-1 != this.nodeIndex)$(this.nodes[this.nodeIndex]).css(this.options.hide);	
+			if(this.nodeIndex<this.nodes.length){				
+				this.nodeIndex ++;
+				$(this.nodes[this.nodeIndex]).css(this.options.show);
+				var _this = this;
+				this.timeout = setTimeout(function(){
+					_this.startTravelNode();
+				},this.options.timer);
+			}else this.stopTravelNode();
+		}
+		BinaryTree.prototype.front = function(node){
+			//二叉树前序遍历：根-左-右
+			if(null != node){
+				this.nodes.push(node);
+				this.front(node.firstElementChild);
+				this.front(node.lastElementChild);
+			}
+		}
+		BinaryTree.prototype.center = function(node){
+			//二叉树中序遍历：左-根-右
+			if(null != node){				
+				this.center(node.firstElementChild);
+				this.nodes.push(node);
+				this.center(node.lastElementChild);
+			}
+		}		
+		BinaryTree.prototype.back = function(node){
+			//二叉树后序遍历：左-右-根
+			if(null != node){				
+				this.back(node.firstElementChild);				
+				this.back(node.lastElementChild);
+				this.nodes.push(node);
+			}
+		}
+		BinaryTree.prototype.start = function(tType){
+			this.stopTravelNode();
+			var type = parseInt(tType) || 0;				
+			switch(type){
+				case 0:
+					this.front(this.rootElem);
+				break;
+				case 1:
+					this.center(this.rootElem);
+				break;
+				case 2:
+					this.back(this.rootElem);
+				break;
+			}
+			this.startTravelNode();
+		}
+		
+		$(function(){
+			var $treeContainer = $('#tree-container'),
+			binaryTree = new BinaryTree($treeContainer.get(0),{
+				show:{
+					'background':'lightblue'
+				},
+				hide:{
+					'background':'transparent'
+				},
+				timer:500
+			}),
+			eventTargets = [$('#front-travel'),$('#center-travel'),$('#end-travel')];
+			for(var i=0,len=eventTargets.length;i<len;i++){
+				var target = eventTargets[i];
+				target.index = i;
+				(function(tar){
+					tar.on('click',function(){
+						binaryTree.start(tar.index);
+					});
+				}(target));					
+			}
+		})
+	</script>
+</head>
+<body>
+	<div class="wrapper">
+		<button id="front-travel">前序遍历(DLR)</button>
+		<button id="center-travel">中序遍历(LDR)</button>
+		<button id="end-travel">后序遍历(LRD)</button>
+		<div class="tree-container" id="tree-container">
+			<div>
+				<div>
+					<div>
+						<div></div>
+						<div></div>
+					</div>
+					<div>
+						<div></div>
+						<div></div>
+					</div>
+				</div>
+				<div>
+					<div>
+						<div></div>
+						<div></div>
+					</div>
+					<div>
+						<div></div>
+						<div></div>
+					</div>
+				</div>
+			</div>
+			<div>
+				<div>
+					<div>
+						<div></div>
+						<div></div>
+					</div>
+					<div>
+						<div></div>
+						<div></div>
+					</div>
+				</div>
+				<div>
+					<div>
+						<div></div>
+						<div></div>
+					</div>
+					<div>
+						<div></div>
+						<div></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
