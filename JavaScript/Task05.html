@@ -6,27 +6,38 @@
 	<link rel="stylesheet" type="text/css" href="css/normalize.css">
 	<style type="text/css">
 		.wrapper{
-			width: 800px;
-			margin: 100px auto;
+			width: 80%;
+			margin: 0 auto;
 		}
 		ul{
+			width: 100%;
 			list-style: none;
+			border: 1px solid black;
+			height: 400px;
 			padding: 0;
 			overflow:hidden;
+			padding-top: 50px;
 		}
 		li{
-			min-width: 5px;
+			float: left;
+			height: 100%;
+			margin: 0 .25%;
 			cursor: pointer;
-			margin-left: 5px;
-			padding: 5px;
-			text-align: center;
-			background-color: darkred;
-			display: inline-block;
-			vertical-align: bottom;
+			width: 1.5%;
+			background-color: darkred;			
 		}
-		
-		li:first-child{
-			margin-left: 0;
+		li:nth-child(even){
+			background-color: green;
+		}
+		li div{
+			transition: height 1s;
+			background: white;
+		}
+		p{
+			margin: 0;
+			position: relative;
+			top: -1.42em;
+			font-size: 14px;
 		}
 	</style>
 	<script type="text/javascript">
@@ -34,10 +45,11 @@
 		*	addEventListener	支持IE8+浏览器,事件名称前不用加on
 		*	attachEvent			用于<=IE8 或 Opera 7.0 及 Opera事件处理，事件名称前要加on关键字
 		*/
+		var bDesc = true,sortBtn = null;
 		var setting = {
 						minValue:10,
 						maxValue:100,
-						maxCount:60
+						maxCount:50
 					};
 		function addEventListener(elm,etype,func){
 			if(elm){
@@ -75,51 +87,81 @@
 		function removeValueItem(){
 			removeLiItem(this);
 		}
-		function intoValue(direction){			
-			var value = parseInt(inputValue.value);
-			if(liItems.length>=setting.maxCount){
-				alert(value);
-				return;
-			}
-			if(value>=setting.minValue && value<=setting.maxValue){
+		function createNumberItem(value,direction){
+			value = parseInt(value);
+			var ret = (value>=setting.minValue && value<=setting.maxValue);
+			if(ret){
 				var li = document.createElement('li');
-				li.value = value;
+				var div = document.createElement('div');
+				var txtNode = document.createElement('p');
+				txtNode.innerHTML = value;
+				div.style.height = (100-value) + '%';
+				
+				li.appendChild(div);
+				li.appendChild(txtNode);
+				li.setAttribute('data-value',value);
+
 				if(liItems.length==0 || direction==1){
 					listContainer.appendChild(li);
 				}else{
 					listContainer.insertBefore(li,liItems[0]);
 				}
-				li.style.height = value + 'px';
 				addEventListener(li,'click',removeValueItem)
-				inputValue.value = '';				
-			}else{
-				alert('请输入' + setting.minValue +' ~ ' + setting.maxValue + ' 之间的数字。');
+				inputValue.value = '';		
+			}
+			return ret;
+		}
+		function intoValue(direction){			
+			var value = parseInt(inputValue.value);
+			if(liItems.length>=setting.maxCount){
+				alert('最多只能添加 ' + setting.maxCount+' 项.');
+				return;
+			}
+			if(!createNumberItem(value,direction))alert('请输入' + setting.minValue +' ~ ' + setting.maxValue + ' 之间的数字。');
+		}
+
+		function resort(){			
+			bDesc = !bDesc;		
+			sortBtn.innerText = (bDesc?"降序":"升序");	
+			var len = liItems.length;			
+			if(len>1){
+				i=0;
+				while(i<len){
+					var n=0,nlen=len-1;
+					while(n<nlen){
+						var pV = parseInt(liItems[n].getAttribute('data-value')),nV = parseInt(liItems[n+1].getAttribute('data-value'));
+						if((bDesc && pV>nV) || (!bDesc && pV<nV)){
+							liItems[n].setAttribute('data-value',nV);
+							liItems[n+1].setAttribute('data-value',pV);
+						}
+						n++;
+					}
+					i++;
+				}
+				i = 0;
+				while(i<len){
+					var nV = parseInt(liItems[i].getAttribute('data-value'));
+					liItems[i].firstElementChild.style.height = (100-nV) + '%';
+					liItems[i].lastElementChild.innerHTML = nV;
+					i ++;
+				}
 			}
 		}
-		function resort(){
+		function randomCreate(){
 			var len = liItems.length;
-			if(len>1){
-				var nArr = [];
-				for(var i=0;i<len;i+=1){
-					var index = -1;
-					var iv = liItems[i];
-					for(var n=0,nlen=nArr.length;n<nlen;n++){						
-						var nv = nArr[n];
-						if(iv.value>nv.value){
-							index = n;
-							break;
-						}
-					}
-					if(index!=-1)nArr.splice(index,0,iv);
-					else nArr.push(iv);
-				}
-				for(i=0;i<len;i+=1)listContainer.appendChild(nArr[i]);
+			while(len>0){
+				len --;
+				listContainer.removeChild(liItems[len]);
+			}
+			while(liItems.length<setting.maxCount){
+				createNumberItem(Math.ceil(Math.random()*90)+10,1);
 			}
 		}
 		function getElementById(id){
 			return document.getElementById(id);
 		}
 		window.onload = function(){
+			sortBtn = getElementById('sort-btn');
 			var eventTargets = [{
 						btn:getElementById('into-left'),
 						call:intoValue,
@@ -137,13 +179,16 @@
 						call:outValue,
 						param:1,
 					},{
-						btn:getElementById('sort-btn'),
+						btn:sortBtn,
 						call:resort
+					},{						
+						btn:getElementById('random-btn'),
+						call:randomCreate
 					}];
 			inputValue = getElementById('input-value');
 			listContainer = getElementById('list-container');
 			liItems = listContainer && listContainer.getElementsByTagName('li');
-
+		
 			for(var i=0,len=eventTargets.length;i<len;i++){
 				(function(item){
 					addEventListener(item.btn,'click',function(){
@@ -151,6 +196,7 @@
 					});
 				})(eventTargets[i]);
 			}
+			randomCreate();
 		}
 	</script>
 </head>
@@ -162,6 +208,7 @@
 		<button id='out-left'>左侧出</button>
 		<button id='out-right'>右侧出</button>
 		<button id="sort-btn">排序</button>
+		<button id="random-btn">随机创建</button>
 		<ul id='list-container'>
 		</ul>
 	</div>
